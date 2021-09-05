@@ -9,6 +9,7 @@ import { PagesComponent } from './pages.component';
 
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AccountSettingsComponent } from './account-settings/account-settings.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms';
     ProgressComponent,
     Grafica1Component,
     PagesComponent,
+    AccountSettingsComponent,
   ],
   imports: [
     CommonModule,
@@ -29,6 +31,7 @@ import { FormsModule } from '@angular/forms';
     ProgressComponent,
     Grafica1Component,
     PagesComponent,
+    AccountSettingsComponent,
   ],
 })
 export class PagesModule {}
