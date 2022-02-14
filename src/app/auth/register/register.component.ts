@@ -1,5 +1,8 @@
+import { UsuarioService } from './../../services/usuario.service';
+
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import Swal from "sweetalert2";
 
 @Component({
   selector: 'app-register',
@@ -20,13 +23,27 @@ export class RegisterComponent {
     validators: this.passwordsIguales("password", "password2")
   });
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private usuarioService: UsuarioService) {
 
   }
 
   crearUsuario() {
     this.formSubmitted = true;
     console.log(this.registerForm.value);
+
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    // Realizar la creación
+    this.usuarioService.crearUsuario(this.registerForm.value)
+      .subscribe(resp => {
+        console.log("usuario creado.");
+        console.log(resp);
+      }, (err) => {
+        // Si sudede un error
+        Swal.fire("Error", err.error.msg, "error");
+      });
   }
 
   campoNoValido(campo: string): boolean {
