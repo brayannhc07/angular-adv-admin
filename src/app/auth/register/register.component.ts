@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { UsuarioService } from './../../services/usuario.service';
 
 import { Component } from '@angular/core';
@@ -23,7 +24,7 @@ export class RegisterComponent {
     validators: this.passwordsIguales("password", "password2")
   });
 
-  constructor(private fb: FormBuilder, private usuarioService: UsuarioService) {
+  constructor(private fb: FormBuilder, private usuarioService: UsuarioService, private router: Router) {
 
   }
 
@@ -38,8 +39,8 @@ export class RegisterComponent {
     // Realizar la creación
     this.usuarioService.crearUsuario(this.registerForm.value)
       .subscribe(resp => {
-        console.log("usuario creado.");
-        console.log(resp);
+        // Mover al dashboard
+        this.router.navigateByUrl("/");
       }, (err) => {
         // Si sudede un error
         Swal.fire("Error", err.error.msg, "error");
