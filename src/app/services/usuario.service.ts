@@ -1,3 +1,4 @@
+import { Usuario } from './../models/usuario.model';
 import { Router } from '@angular/router';
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -18,14 +19,21 @@ declare const gapi: any;
 export class UsuarioService {
 
   public auth2: any;
+  public usuario: Usuario | undefined;
 
   constructor(private http: HttpClient,
     private router: Router,
     private ngZone: NgZone) {
-
     this.googleInit();
   }
 
+  get token(): string {
+    return localStorage.getItem("token") || '';
+  }
+
+  get uid(): string {
+    return this.usuario?.uid || '';
+  }
   googleInit() {
     return new Promise<void>(resolve => {
 
@@ -49,17 +57,21 @@ export class UsuarioService {
   }
 
   validarToken(): Observable<boolean> {
-    const token = localStorage.getItem("token") || '';
 
     return this.http.get(`${base_url}login/renew`, {
       headers: {
-        "x-token": token
+        "x-token": this.token
       }
     }).pipe(
-      tap((resp: any) => {
+      map((resp: any) => {
+        // Save userData in localStorage
+        const { email, google, nombre, rol, uid, img = "" } = resp.usuario;
+
+        this.usuario = new Usuario(nombre, email, "", img, google, rol, uid);
+
         localStorage.setItem("token", resp.token);
+        return true;
       }),
-      map(resp => true),
       catchError(error => of(false))
     );
   }
@@ -69,6 +81,20 @@ export class UsuarioService {
       .pipe(tap((resp: any) => {
         localStorage.setItem("token", resp.token);
       }));
+  }
+
+  actualizarPerfil(data: { email: string, nombre: string, role: string }) {
+
+    data = {
+      ...data,
+      role: this.usuario?.rol || ''
+    };
+
+    return this.http.put(`${base_url}usuarios/${this.uid}`, data, {
+      headers: {
+        "x-token": this.token
+      }
+    });
   }
 
   login(formData: LoginForm) {
