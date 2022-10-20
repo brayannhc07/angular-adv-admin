@@ -1,9 +1,9 @@
 import { Router } from '@angular/router';
-import { UsuarioService } from './../../services/usuario.service';
-
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import Swal from "sweetalert2";
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+import { UsuarioService } from './../../services/usuario.service';
 
 @Component({
   selector: 'app-register',

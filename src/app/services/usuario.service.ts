@@ -11,7 +11,7 @@ import { RegisterForm } from '../interfaces/register-form.interface';
 import { Observable, of } from 'rxjs';
 
 const base_url = environment.base_url;
-declare const gapi: any;
+declare const google: any;
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,6 @@ export class UsuarioService {
   constructor(private http: HttpClient,
     private router: Router,
     private ngZone: NgZone) {
-    this.googleInit();
   }
 
   get token(): string {
@@ -34,26 +33,16 @@ export class UsuarioService {
   get uid(): string {
     return this.usuario?.uid || '';
   }
-  googleInit() {
-    return new Promise<void>(resolve => {
-
-      gapi.load('auth2', () => {
-        this.auth2 = gapi.auth2.init({
-          client_id: '711704106982-qgabo3kkv2n6kuhi6lmps3lb6go0hp3q.apps.googleusercontent.com',
-          cookiepolicy: 'single_host_origin',
-        });
-        resolve();
-      });
-    });
-  }
 
   logout() {
     localStorage.removeItem("token");
-    this.auth2.signOut().then(() => {
+
+    // Cierra sesión en google
+    google.accounts.id.revoke(this.usuario?.email, () => {
       this.ngZone.run(() => {
         this.router.navigateByUrl("/login");
       });
-    });
+    })
   }
 
   validarToken(): Observable<boolean> {
@@ -66,9 +55,7 @@ export class UsuarioService {
       map((resp: any) => {
         // Save userData in localStorage
         const { email, google, nombre, rol, uid, img = "" } = resp.usuario;
-
         this.usuario = new Usuario(nombre, email, "", img, google, rol, uid);
-
         localStorage.setItem("token", resp.token);
         return true;
       }),
