@@ -24,6 +24,7 @@ export class UsuarioService {
   constructor(private http: HttpClient,
     private router: Router,
     private ngZone: NgZone) {
+    this.googleInit();
   }
 
   get token(): string {
@@ -34,6 +35,31 @@ export class UsuarioService {
     return this.usuario?.uid || '';
   }
 
+  googleInit() {
+    return new Promise<void>(resolve => {
+      google.accounts.id.initialize({
+        client_id:
+          "711704106982-15gqsq5jvhohtpganah9nu55g7lpfefd.apps.googleusercontent.com",
+        callback: (response: any) => this.handleCredentialResponse(response)
+      });
+      resolve();
+
+
+    });
+
+  }
+
+  handleCredentialResponse(response: any) {
+    // console.log("Encoded JWT ID token: " + response.credential);
+    this.loginGoogle(response.credential)
+      .subscribe(resp => {
+        // Navegar al dashboard
+        this.ngZone.run(() => {
+          this.router.navigateByUrl("/");
+        });
+      });
+  }
+
   logout() {
     localStorage.removeItem("token");
 
@@ -42,7 +68,7 @@ export class UsuarioService {
       this.ngZone.run(() => {
         this.router.navigateByUrl("/login");
       });
-    })
+    });
   }
 
   validarToken(): Observable<boolean> {

@@ -16,7 +16,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
   @ViewChild("googleBtn", { static: true })
   googleBtn!: ElementRef;
 
-  public auth2: any;
   public formSubmitted = false;
   public loginForm = this.fb.group({
     email: [localStorage.getItem("email") || "", [Validators.required, Validators.email]],
@@ -32,11 +31,19 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private ngZone: NgZone) { }
 
   ngOnInit(): void {
-    this.googleInit();
+    this.startApp();
   }
 
   ngAfterViewInit(): void {
+  }
 
+  async startApp() {
+    await this.usuarioService.googleInit();
+    google.accounts.id.renderButton(
+      this.googleBtn.nativeElement,
+      { theme: "outline", size: "large" } // customization attributes
+    );
+    google.accounts.id.prompt(); // also display the One Tap dialog
   }
 
   login(): void {
@@ -52,32 +59,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.router.navigateByUrl("/");
       }, (err) => {
         Swal.fire("Error", err.error.msg, "error");
-      });
-    // this.router.navigateByUrl('/');
-  }
-
-  googleInit() {
-    google.accounts.id.initialize({
-      client_id:
-        "711704106982-15gqsq5jvhohtpganah9nu55g7lpfefd.apps.googleusercontent.com",
-      callback: (response: any) => this.handleCredentialResponse(response)
-    });
-    google.accounts.id.renderButton(
-      // document.getElementById("buttonDiv")
-      this.googleBtn.nativeElement,
-      { theme: "outline", size: "large" } // customization attributes
-    );
-    google.accounts.id.prompt(); // also display the One Tap dialog
-  }
-
-  handleCredentialResponse(response: any) {
-    // console.log("Encoded JWT ID token: " + response.credential);
-    this.usuarioService.loginGoogle(response.credential)
-      .subscribe(resp => {
-        // Navegar al dashboard
-        this.ngZone.run(() => {
-          this.router.navigateByUrl("/");
-        });
       });
   }
 

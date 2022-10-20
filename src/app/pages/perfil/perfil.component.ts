@@ -3,6 +3,7 @@ import { Usuario } from './../../models/usuario.model';
 import { UsuarioService } from './../../services/usuario.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-perfil',
@@ -15,6 +16,7 @@ export class PerfilComponent implements OnInit {
   public perfilForm!: FormGroup;
   public usuario: Usuario | undefined;
   public imagenSubir: File | undefined;
+  public imgTemp: any;
 
   constructor(private fb: FormBuilder,
     private usuarioService: UsuarioService,
@@ -39,6 +41,10 @@ export class PerfilComponent implements OnInit {
         const { nombre, email } = this.perfilForm?.value;
         this.usuario!.email = email;
         this.usuario!.nombre = nombre;
+
+        Swal.fire("Guardado", "Cambios fueron guardos.", "success");
+      }, err => {
+        Swal.fire("Error", err.error.msg, "error");
       });
 
   }
@@ -49,11 +55,29 @@ export class PerfilComponent implements OnInit {
     const file = files![0];
     this.imagenSubir = file;
 
+    if (!file) {
+
+      return this.imgTemp = null;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = () => {
+      this.imgTemp = reader.result;
+    }
+    return null;
   }
 
   subirImagen() {
     this.fileUploadServices.actualizarFoto(this.imagenSubir!, 'usuarios', this.usuario?.uid!)
-      .then(console.log);
+      .then(img => {
+        this.usuario!.img = img
+        Swal.fire("Imagen actualizada", "Imagen de perfil actualizada correctamente.", "success");
+      }).catch(err => {
+        console.log(err);
+        Swal.fire("Error", "No se pudo subir la imagen", "error");
+      });
   }
 
 }
